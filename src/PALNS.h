@@ -27,6 +27,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <numeric>
 
 namespace mlpalns {
     /*! @brief This class models the PALNS algorithm solver
@@ -550,13 +551,18 @@ namespace mlpalns {
          *  @param   num_threads   Number of threads to start
          */
         void start_threads(std::uint32_t num_threads) {
-            std::vector<std::thread> threads(num_threads);
-            for(auto i = 0u; i < num_threads; ++i) {
-                threads[i] = std::thread([i, this]() { start_thread(i); });
+            if (num_threads == 1) {
+                start_thread(0);
             }
+            else {
+                std::vector<std::thread> threads(num_threads);
+                for (auto i = 0u; i < num_threads; ++i) {
+                    threads[i] = std::thread([i, this]() { start_thread(i); });
+                }
 
-            for(auto& thread : threads) {
-                thread.join();
+                for (auto &thread : threads) {
+                    thread.join();
+                }
             }
         }
 
